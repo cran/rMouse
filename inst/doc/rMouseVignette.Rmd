@@ -1,0 +1,88 @@
+---
+title: "rMouse - Introduction"
+author: "Dejan Prvulovic"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rMouse - Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Automate mouse clicks and send keyboard input with rMouse
+
+rMouse is inspired by packages like pyautogui in Python. The goal of the package is to let users **create simple mouse and keyboard macros to automate user input**. 
+
+The package utilizes the Java Robot Class and depends on the rJava package. Make sure the R version correspons to the Java version, e.g. 64-bit R with 64-bit Java. Troubleshooting rJava can be done via its documentation or online. 
+
+rMouse creates a Java Robot Object (jRobot) and an Mouse Info Object (jMouseInfo) upon loading. The functions provided in this package are wrapper functions to call the methods of the Java objects. 
+
+Basically, there are three function categories
+
+* Delays
+* Mouse input
+* Keyboard input
+
+Each function has a build-in **emergency stop procedure**. If the mouse cursor is in the top left corner at pixel(x = 0, y = 0), then the execution is suspended. By setting `failSafe = FALSE` as a parameter of the function, the emergency stop procedure is turned off. 
+
+
+
+### Delays
+
+Delay functions let the system wait between commands and work similar to Base R's `Sys.sleep(time)`. 
+
+It's advisable to **set the auto delay** at the beginning:
+
+```{r, eval = FALSE}
+library(rMouse)
+setAutoDelay()    # default
+```
+
+A regular **delay** in milliseconds can be set with:
+
+```{r, eval = FALSE}
+delay(1000)      # wait 1 second
+```
+
+### Mouse Inputs
+
+**Moving** and **clicking** the mouse can be done with:
+
+```{r, eval = FALSE}
+move(0,0)       # move to top left corner (0,0)
+move(50,30)     # move to pixel x = 50, y = 30
+left()          # left click
+right()         # right click
+```
+
+To get the **current cursor position**, use:
+
+```{r, eval = FALSE}
+coord()       # returns a list
+pos()         # prints to console
+#> move(x,y)
+```
+
+Since the Java Robot Class does not provide a way to **record** mouse clicks, there is a workaround function called `record()`. With it you specify how often you want to record the mouse cursor and after how many seconds the position is recorded. Thereby, it is possible to record subsequent mouse positions. The function prints template code to the console, which can easily be adjusted to rapidly build a mouse macro. 
+
+```{r, eval = FALSE}
+# 3 records, 3 seconds in between recordings
+record(n = 3, timeInterval = 3) 
+#> delay(2000); move(412,668); left()
+#> delay(2000); move(155,636); left() 
+#> delay(2000); move(387,697); left()
+```
+
+![Animation of record()](Record.gif)
+
+
+### Keyboard Input
+
+There are two functions for **keyboard input**. Generally, it is possible to send numbers [0-9], letters [A-Z] & [a-z], spaces, commas and periods. Special characters are not allowed, as the raw bytes from R differ from the virtual key mapping in Java. Moreover, "ESC", "ENTER and "TAB" keys are implemented. 
+
+```{r, eval = FALSE}
+type("This is a sentence.")  # a String to be typed, no spec char
+type("!")                    # throws an error
+specialKey("ESC")            # send ESC key
+specialKey("ENTER")          # send ENTER key
+```
